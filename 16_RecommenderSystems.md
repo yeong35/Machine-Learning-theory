@@ -91,5 +91,81 @@
     - 알고리즘이 합리적인 parameter set에 수렴하도록 돕습니다
     - 이건 collaborative filtering이라고 합니다
 ## Collaborative filtering Algorithm
+- Collaborative filtering Algorithm에 대해 알아봅시다
+- 만약 film's feature들이 주어진다면, 유저들의 선호도를 알아낼 수 있습니다
+    - ![Given_x](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[15].png)
+- 만약 유저들의 선호도를 알고있다면, film's feature를 알 수 있습니다
+    - ![Given_Theta;](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[16].png)
+- 우리가 할 수 있는 것은
+    - parameter 랜덤하게 초기화히기
+    - Go back and forward
+- 하지만 &Theta;와 x을 동시에 해결할 수 있는 더 효율적인 알고리즘이 있습니다
+    - 아래는 &Theta;와 x를 동시에 해결할 수 있는 그 알고리즘입니다
+    - ![efficient](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[17].png)
+- optimization objective 이해하기
+    - squared error term은 위에 두 공식(선호도로 feature, feature로 선호도)와 같습니다
+    - ![squaredErrorTerm](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[18].png)
+        - 이것은 모든 유저가 점수를 준 모든 영화를 다 더하는 것입니다
+        - 위에 ":"는 "for which"을 의미합니다
+        - r(i, j)가 1인 모든쌍 (i, j)의 합계
+    - regularization term
+        - 위에 두 optimization function의 끝부분을 그저 더한 것입니다
+- film's feature x와 사용자 parameter &Theta;를 둘 동시에 다루는 하나의 optimization fuction을 떠올릴 수 있습니다.
+- 이 방법에 따라 feature를 학습시키면
+    - x<sub>0</sub>가 필요가 없어집니다
+    - x랑 &Theta; 모두 n-dimensional vector가 됩니다
+### Algorithm Structure
+1. &Theta;<sup>1</sup>, ..., &Theta;<sup>nu</sup>과 x<sup>1</s>, ..., x<sup>nm</sup>를 작은 랜덤값으로 초기화합니다
+2. gradient descent를 이용하여 J(&Theta;<sup>1</sup>, ..., &Theta;<sup>nu</sup>, x<sup>1</s>, ..., x<sup>nm</sup>)를 최소화합니다
+    - ![GradientDescent1](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[19].png)
+    - ![GradientDescent2](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[20].png)
+    - 위는 x<sub>k</sub><sup>i</sup>에 대한 cost fuction 편도함수이고 아래는 &Theta;<sub>k</sub><sup>i</sup>의 cost function의 편도함수입니다
+    - 이제 모든 parameter를 정규화하기에 모두 똑같은 규칙을 갖습니다
+3. user(user j), parameters &Theta;, movie(movie i)와 학습된 feauters x가 주어졌을 때, 우리는 (&Theta;<sup>j</sup>)<sup>T</sup>x<sup>i</sup>를 예상할 수 있습니다! 
 ## Vectorization: Low rank matrix factorization
+- 위의 collaborative filtering algorithm을 어떻게 더 향상시킬 수 있을까요?
+    - 하나의 제품이 주어졌을때, 다른 관련 제품을 어떻게 고를까요?
+- 위의 예에서 모든 사용자의 평가를 matrix Y로 그룹화합니다
+    - ![Y](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[21].png)
+        - movie 5편, user 4명
+        - [ 5 x 4 ] 행렬
+    - Y가 주어지면, 모든 예상 평점을 작성하는 다른 방법은 아래와 같습니다
+        - ![Y2](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[22].png)
+        - 이 예측 평가 matrix로 모든 영화에 대한 (i, j)를 정해봅시다
+- X행렬을 정의해봅시다
+    - 이전에 배운 linear regression이랑 비슷합니다
+    - 각 영화의 feature들을 세로로 쌓습니다
+    - ![X](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[23].png)
+    - &Theta;도 정의해줍시다
+    - ![&Theta](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[24].png)
+        - user parameter vector를 세로로 쌓아줍시다
+- metrix X와 &Theta;가 주어졌을 때
+    - X*&Theta;<sup>T</sup>를 함으로써 prediction range matrix를 계산할 수 있습니다.
+- 이 알고리즘을 low rank matrix factorization이라고 할 수 있습니다
 ## Implementation detail: Mean Normalization
+- mean normalization을 설명하기위해 어떤 영화도 평가하지 않은 user가 있다고 해봅시다
+- ![user](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[25].png)
+- 이 user에 대해 어떻게 알고리즘이 동작하는지 봅시다
+    - n = 2라고 합시다
+    - &Theta;<sup>5</sup>을 학습해야합니다
+- 용어 살펴보기
+    - r(i, j)=1인 영화가 없습니다
+    - 따라서 이것은 &Theta;<sup>5</sup>를 결정하는데 아무런 역할을 할 수 없습니다
+    - 따라서 regularization만 최소화하면 됩니다
+    - ![&Theta;<sup>5</sup>](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[26].png)
+ - ![&Theta;](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[27].png)
+- 아무런 평가를 하지 않았으니 위와같이 0값일 것입니다   
+- 이러면 어떤 영화도 싫어하지 않는 것이기 때문에 영화를 추천해줄 수 없습니다
+- 이것을 mean normalization이 해결해줄 수 있습니다
+### How does mean normalization work?
+- ![Y](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[28].png)
+- ![&mu;](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[29].png)
+- 각 row를 평균낸 것이 &mu; Vector
+- ![newY](http://www.holehouse.org/mlclass/16_Recommender_Systems_files/Image%20[30].png)
+- 각 열을 mu의 entry로 빼줍니다. 각 영화를 평균 비율로 normalize 해준 겁니다
+- 각 file i에서 uesr j예측은..
+    - (&Theta;<sup>j</sup>)x<sup>i</sup>+&mu;<sub>i</sub>
+        - (&Theta;<sup>5</sup>)x<sup>i</sup>는 여전히 0이다
+        - 그러나 &mu;<sub>i</sub>(영화의 평균 등급)을 더해줍니다
+- 이렇게하면 아무런 평가는 안했지만, 모든 사람에 근거한 영화 비율의 평균으로 예상될 수 있습니다!
+    - 이게 저희의 최선입니다..
